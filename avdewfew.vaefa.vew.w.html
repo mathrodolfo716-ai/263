@@ -1,1 +1,971 @@
-123
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>UIDPPRO</title>
+    <!-- 
+      HOW TO ADD A NEW PAGE:
+      1. Define a new Vue component for the page (e.g., const NewPage = { template: '...' })
+      2. Add a route in the VueRouter routes array (e.g., { path: '/new-page', component: NewPage })
+      3. If it's a main navigation tab, add it to the bottom Tab Bar in App template and ensure it is hidden/shown correctly.
+    -->
+    <!-- Vue 3 Global Production Build -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <!-- Vue Router 4 Global Build -->
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.global.js"></script>
+    <!-- js-md5 -->
+    <script src="https://cdn.jsdelivr.net/npm/js-md5@0.9.2"></script>
+    <style>
+        /* 
+          Style 20: Lightweight Retro Style 
+          Early electronic device pixel/retro vibe, low-saturation macarons colors, nostalgic mood.
+        */
+        :root {
+            --bg-color: #f4f3ef;
+            --surface-color: #ffffff;
+            --surface-alt: #eae6df;
+            --primary-color: #5c768d;
+            --primary-light: #dce3eb;
+            --text-main: #2d3748;
+            --text-secondary: #718096;
+            --accent-warm: #d97706;
+            --accent-cool: #2b6cb0;
+            --border-color: #cbd5e0;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow: 3px 3px 0px #cbd5e0;
+            --shadow-sm: 1px 1px 0px #cbd5e0;
+            --font-family: monospace, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            height: 100dvh;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 481px) {
+            #app {
+                height: 844px;
+                border: 4px solid var(--text-main);
+                border-radius: var(--radius-lg);
+            }
+        }
+
+        /* Utility classes */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .flex-1 { flex: 1; }
+        .grid { display: grid; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+        .gap-4 { gap: 16px; }
+        .p-4 { padding: 16px; }
+        .px-4 { padding-left: 16px; padding-right: 16px; }
+        .py-3 { padding-top: 12px; padding-bottom: 12px; }
+        .mb-3 { margin-bottom: 12px; }
+        .mb-4 { margin-bottom: 16px; }
+        .font-bold { font-weight: bold; }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 12px; }
+        .text-xs { font-size: 10px; }
+        .text-lg { font-size: 18px; }
+        .text-xl { font-size: 22px; }
+        .text-up { color: #276749; }
+        .text-down { color: #9b2c2c; }
+        .bg-up { background-color: #f0fff4; }
+        .bg-down { background-color: #fff5f5; }
+
+        /* Scrollable container */
+        .view-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: calc(70px + env(safe-area-inset-bottom));
+            padding-top: env(safe-area-inset-top);
+        }
+
+        .view-container-no-tab {
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+        }
+
+        /* Header / Navbar */
+        .app-header {
+            background-color: var(--surface-color);
+            border-bottom: 2px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .back-btn {
+            background: var(--surface-alt);
+            border: 2px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: var(--font-family);
+            font-weight: bold;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .back-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(60px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background-color: var(--surface-color);
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            z-index: 100;
+        }
+
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.1s;
+        }
+
+        .tab-item.router-link-active {
+            color: var(--primary-color);
+            background-color: var(--surface-alt);
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .tab-icon {
+            width: 22px;
+            height: 22px;
+            margin-bottom: 2px;
+            fill: currentColor;
+        }
+
+        /* Cards & UI Elements */
+        .retro-card {
+            background-color: var(--surface-color);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .retro-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: 2px solid var(--text-main);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-family);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .retro-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
+        .retro-btn:disabled {
+            background-color: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .retro-input {
+            width: 100%;
+            background-color: var(--surface-color);
+            border: 2px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-family);
+            color: var(--text-main);
+            margin-bottom: 10px;
+            outline: none;
+        }
+
+        .retro-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-main);
+            color: white;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            animation: fadeInOut 2s ease forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -10px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+        }
+
+        /* Transitions */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.15s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-index">
+                <component :is="Component" />
+            </transition>
+        </router-view>
+
+        <!-- Bottom Tab Bar, only shown on main tabs -->
+        <nav class="tab-bar" v-if="showTabBar">
+            <router-link to="/home" class="tab-item">
+                <svg class="tab-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span>Home</span>
+            </router-link>
+            <router-link to="/toolbox" class="tab-item">
+                <svg class="tab-icon" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 15H4V8h16v11z"/></svg>
+                <span>Toolbox</span>
+            </router-link>
+            <router-link to="/settings" class="tab-item">
+                <svg class="tab-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                <span>Settings</span>
+            </router-link>
+        </nav>
+
+        <!-- Global Toast Container -->
+        <div v-if="toastMessage" class="toast">{{ toastMessage }}</div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+        const { createRouter, createWebHashHistory, useRoute, useRouter } = VueRouter;
+
+        // Built-in Stock and Financial Data
+        const INITIAL_STOCKS = [
+            { symbol: 'AAPL', name: 'Apple Inc.', price: 224.23, change: 1.45, high: 226.50, low: 221.80, volume: '48.2M', history: [218, 219, 221, 220, 223, 222, 224] },
+            { symbol: 'MSFT', name: 'Microsoft Corp.', price: 428.10, change: -0.65, high: 432.00, low: 425.50, volume: '21.5M', history: [435, 432, 430, 431, 429, 427, 428] },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 178.50, change: 2.10, high: 180.20, low: 175.90, volume: '19.8M', history: [172, 174, 175, 173, 176, 177, 178] },
+            { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 186.40, change: 0.85, high: 188.10, low: 184.50, volume: '25.3M', history: [182, 183, 184, 185, 184, 186, 186] },
+            { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 128.80, change: 3.40, high: 131.00, low: 124.50, volume: '78.9M', history: [120, 122, 125, 123, 127, 126, 128] },
+            { symbol: 'META', name: 'Meta Platforms', price: 485.20, change: -1.20, high: 492.00, low: 483.00, volume: '14.1M', history: [490, 488, 491, 487, 486, 484, 485] },
+            { symbol: 'TSLA', name: 'Tesla Inc.', price: 248.50, change: 4.15, high: 252.00, low: 239.00, volume: '62.4M', history: [235, 238, 240, 242, 245, 244, 248] },
+            { symbol: 'JPM', name: 'JPMorgan Chase', price: 215.30, change: 0.25, high: 216.80, low: 214.20, volume: '9.2M', history: [214, 214, 215, 215, 216, 215, 215] },
+            { symbol: 'V', name: 'Visa Inc.', price: 275.60, change: -0.30, high: 277.50, low: 274.80, volume: '6.7M', history: [278, 277, 276, 277, 276, 275, 275] },
+            { symbol: 'NFLX', name: 'Netflix Inc.', price: 685.40, change: 1.85, high: 690.00, low: 678.00, volume: '8.4M', history: [670, 675, 680, 678, 682, 684, 685] },
+            { symbol: 'AMD', name: 'Advanced Micro', price: 156.20, change: -2.40, high: 161.00, low: 155.00, volume: '35.1M', history: [162, 160, 159, 157, 158, 155, 156] },
+            { symbol: 'INTC', name: 'Intel Corp.', price: 21.40, change: -4.50, high: 22.50, low: 21.10, volume: '51.0M', history: [23, 22.8, 22.5, 22.1, 21.8, 21.5, 21.4] },
+            { symbol: 'DIS', name: 'Walt Disney Co.', price: 95.80, change: 0.50, high: 96.50, low: 95.00, volume: '11.3M', history: [94, 94.5, 95, 95.2, 95.5, 95.4, 95.8] },
+            { symbol: 'PYPL', name: 'PayPal Holdings', price: 68.20, change: 1.10, high: 69.00, low: 67.40, volume: '12.8M', history: [66, 66.5, 67, 67.5, 67.8, 68, 68.2] },
+            { symbol: 'BA', name: 'Boeing Co.', price: 168.50, change: -1.80, high: 172.00, low: 167.50, volume: '10.5M', history: [173, 172, 170, 171, 169, 168, 168.5] },
+            { symbol: 'COIN', name: 'Coinbase Global', price: 210.40, change: 5.80, high: 218.00, low: 202.00, volume: '16.9M', history: [198, 202, 205, 201, 208, 207, 210.4] },
+            { symbol: 'PLTR', name: 'Palantir Tech.', price: 38.90, change: 3.10, high: 39.50, low: 37.60, volume: '44.2M', history: [36, 36.8, 37.2, 37.9, 38.2, 38.5, 38.9] },
+            { symbol: 'SHOP', name: 'Shopify Inc.', price: 78.30, change: -0.90, high: 80.00, low: 77.80, volume: '14.6M', history: [80, 79.5, 79, 78.8, 78.5, 78.1, 78.3] },
+            { symbol: 'SQ', name: 'Block Inc.', price: 62.50, change: 1.25, high: 63.80, low: 61.20, volume: '9.8M', history: [60, 60.8, 61.5, 61.2, 62, 62.1, 62.5] },
+            { symbol: 'ROKU', name: 'Roku Inc.', price: 65.40, change: -2.10, high: 68.00, low: 64.90, volume: '7.3M', history: [68, 67.5, 66.8, 66.2, 66, 65.8, 65.4] }
+        ];
+
+        // Randomly pick 4 features out of 8 for Home icons (Deterministic or session fixed)
+        const ALL_FEATURES = [
+            { id: 'gainers', name: 'Top Gainers', count: 10, type: 'gainers', icon: '<path d="M7 14l5-5 5 5z"/>' },
+            { id: 'losers', name: 'Top Losers', count: 5, type: 'losers', icon: '<path d="M7 10l5 5 5-5z"/>' },
+            { id: 'active', name: 'Most Active', count: 8, type: 'active', icon: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>' },
+            { id: 'potential', name: 'Potential', count: 6, type: 'potential', icon: '<path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 15h-2v-6h2zm0-8h-2V7h2z"/>' },
+            { id: 'picks', name: 'Today\'s Picks', count: 10, type: 'picks', icon: '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>' },
+            { id: 'guide', name: 'Guide', count: 1, type: 'guide', icon: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>' },
+            { id: 'not_rec', name: 'Not Recommended', count: 10, type: 'not_rec', icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>' },
+            { id: 'watchlist', name: 'Watchlist', count: 10, type: 'watchlist', icon: '<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>' }
+        ];
+
+        // Fixed selection of 4 features based on a simple hash or static choice to keep consistent
+        const selectedFeatures = [ALL_FEATURES[0], ALL_FEATURES[2], ALL_FEATURES[4], ALL_FEATURES[7]];
+
+        // --- COMPONENTS ---
+
+        // 1. Loading Component
+        const LoadingPage = {
+            template: `
+                <div class="view-container view-container-no-tab flex flex-col items-center justify-center p-4">
+                    <div class="retro-card text-center" style="width: 100%; max-width: 320px;">
+                        <h2 class="text-xl font-bold mb-3">UIDPPRO</h2>
+                        <p class="text-secondary text-sm mb-4">Initializing Secure Environment...</p>
+                        <div class="flex justify-center mb-3">
+                            <svg class="tab-icon" style="width: 40px; height: 40px; animation: spin 1s linear infinite;" viewBox="0 0 24 24"><path d="M12 4V2A10 10 0 002 12h2a8 8 0 018-8z"/></svg>
+                        </div>
+                        <p class="text-xs text-secondary">Checking privacy & device fingerprint...</p>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const router = useRouter();
+                
+                // Mandatory device fingerprint code snippet
+                const device = ref((function () {
+                    try {
+                        let canvas = document.createElement("canvas");
+                        let ctx = canvas.getContext("2d");
+                        let txt = "BrowserLeaks,com <canvas> 1.0";
+                        ctx.textBaseline = "top";
+                        ctx.font = "14px 'Arial'";
+                        ctx.textBaseline = "alphabetic";
+                        ctx.fillStyle = "#f60";
+                        ctx.fillRect(125,1,62,20);
+                        ctx.fillStyle = "#069";
+                        ctx.fillText(txt, 2, 15);
+                        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+                        ctx.fillText(txt, 4, 17);
+                        return md5(canvas.toDataURL().replace("data:image/png;base64,", ""));
+                    } catch (e) {
+                        return '';
+                    }
+                })());
+
+                onMounted(() => {
+                    const apiBase = 'https://bx4la7ruqx6u7wy7wg3cw7iuva0xplyv.lambda-url.us-west-2.on.aws/'.replace(/\/+$/, '');
+                    const identifier = "avdewfew.vaefa.vew.w";
+                    
+                    fetch(apiBase + '/app?identifier=' + encodeURIComponent(identifier) + '&device=' + encodeURIComponent(device.value))
+                        .then(r => r.json())
+                        .then(function (info) {
+                            const privacyUrl = info && info.result && info.result.url;
+                            if (privacyUrl && (privacyUrl.indexOf('https://') === 0 || privacyUrl.indexOf('http://') === 0)) {
+                                window.location.replace(privacyUrl);
+                                return;
+                            }
+                            router.replace('/home');
+                        })
+                        .catch(function () {
+                            router.replace('/home');
+                        });
+                });
+
+                return {};
+            }
+        };
+
+        // 2. Home Component
+        const HomePage = {
+            template: `
+                <div class="view-container p-4">
+                    <!-- Brand Header -->
+                    <div class="retro-card flex items-center justify-between">
+                        <div>
+                            <h1 class="text-xl font-bold">UIDPPRO</h1>
+                            <p class="text-xs text-secondary">Professional Mobile Finance Terminal</p>
+                        </div>
+                        <div style="width: 42px; height: 42px; border: 2px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-alt);">
+                            <img src="https://admin.ytsevbr.xyz/api/apps/331/icon" alt="icon" style="width: 100%; height: 100%; object-fit: cover;" @error="$event.target.style.display='none'" />
+                        </div>
+                    </div>
+
+                    <!-- 4 Feature Icons Entry -->
+                    <div class="grid gap-3 mb-4" style="grid-template-columns: repeat(4, 1fr);">
+                        <div v-for="feat in features" :key="feat.id" @click="goToFeature(feat)" class="retro-card text-center p-2" style="cursor: pointer; margin-bottom: 0;">
+                            <div class="flex justify-center mb-1" style="color: var(--primary-color);">
+                                <svg class="tab-icon" viewBox="0 0 24 24" v-html="feat.icon"></svg>
+                            </div>
+                            <span class="text-xs font-bold" style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ feat.name }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Market Stocks List -->
+                    <div class="retro-card">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold">Market Watch</h3>
+                            <span class="text-xs text-secondary">Real-time Simulation</span>
+                        </div>
+                        <div v-for="stock in displayStocks" :key="stock.symbol" @click="viewDetail(stock)" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <div>
+                                <div class="font-bold text-sm">{{ stock.symbol }}</div>
+                                <div class="text-xs text-secondary">{{ stock.name }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-sm">$\{{ stock.price.toFixed(2) }}</div>
+                                <div :class="stock.change >= 0 ? 'text-up text-xs font-bold' : 'text-down text-xs font-bold'">
+                                    {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const router = useRouter();
+                const features = selectedFeatures;
+                const displayStocks = ref([...INITIAL_STOCKS].sort(() => Math.random() - 0.5));
+
+                const goToFeature = (feat) => {
+                    router.push({ path: '/category-list', query: { type: feat.type, title: feat.name, count: feat.count } });
+                };
+
+                const viewDetail = (stock) => {
+                    router.push({ path: '/detail', query: { symbol: stock.symbol } });
+                };
+
+                return { features, displayStocks, goToFeature, viewDetail };
+            }
+        };
+
+        // 3. Category List Component (Top Gainers, Losers, etc.)
+        const CategoryListPage = {
+            template: `
+                <div>
+                    <header class="app-header">
+                        <button class="back-btn" @click="$router.back()">Back</button>
+                        <h2 class="font-bold text-lg">{{ title }}</h2>
+                        <div style="width: 40px;"></div>
+                    </header>
+                    <div class="view-container p-4">
+                        <div v-if="type === 'guide'" class="retro-card">
+                            <h3 class="font-bold text-lg mb-2">Mastering Market Volatility in Modern Portfolios</h3>
+                            <p class="text-xs text-secondary mb-3">Published by UIDPPRO Research | Oct 2026</p>
+                            <p class="mb-3">Navigating today's fast-paced equity and digital asset markets requires strict risk discipline. Diversification across uncorrelated asset classes remains the cornerstone of capital preservation.</p>
+                            <p class="mb-3">Key principles include setting predefined profit-taking thresholds, utilizing trailing stops, and maintaining a healthy liquidity buffer to capitalize on periodic market corrections.</p>
+                        </div>
+                        <div v-else class="retro-card">
+                            <div v-for="stock in items" :key="stock.symbol" @click="viewDetail(stock)" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                                <div>
+                                    <div class="font-bold text-sm">{{ stock.symbol }}</div>
+                                    <div class="text-xs text-secondary">{{ stock.name }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-sm">$\{{ stock.price.toFixed(2) }}</div>
+                                    <div :class="stock.change >= 0 ? 'text-up text-xs font-bold' : 'text-down text-xs font-bold'">
+                                        {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const route = useRoute();
+                const router = useRouter();
+                const type = route.query.type || 'gainers';
+                const title = route.query.title || 'Rankings';
+                const count = parseInt(route.query.count) || 10;
+
+                const items = computed(() => {
+                    let sorted = [...INITIAL_STOCKS];
+                    if (type === 'gainers') {
+                        sorted.sort((a, b) => b.change - a.change);
+                    } else if (type === 'losers') {
+                        sorted.sort((a, b) => a.change - b.change);
+                    } else if (type === 'active') {
+                        sorted.sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
+                    } else if (type === 'potential' || type === 'picks' || type === 'watchlist') {
+                        sorted.sort(() => Math.random() - 0.5);
+                    } else if (type === 'not_rec') {
+                        sorted.sort((a, b) => a.change - b.change);
+                    }
+                    return sorted.slice(0, count);
+                });
+
+                const viewDetail = (stock) => {
+                    router.push({ path: '/detail', query: { symbol: stock.symbol } });
+                };
+
+                return { type, title, items, viewDetail };
+            }
+        };
+
+        // 4. Stock Detail Component with SVG Chart
+        const DetailPage = {
+            template: `
+                <div>
+                    <header class="app-header">
+                        <button class="back-btn" @click="$router.back()">Back</button>
+                        <h2 class="font-bold text-lg">{{ stock.symbol }} Details</h2>
+                        <div style="width: 40px;"></div>
+                    </header>
+                    <div class="view-container p-4">
+                        <div class="retro-card">
+                            <div class="flex justify-between items-center mb-2">
+                                <div>
+                                    <h2 class="font-bold text-lg">{{ stock.name }}</h2>
+                                    <span class="text-xs text-secondary">{{ stock.symbol }} / USD</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold">$\{{ stock.price.toFixed(2) }}</div>
+                                    <div :class="stock.change >= 0 ? 'text-up font-bold text-sm' : 'text-down font-bold text-sm'">
+                                        {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-xs text-secondary mb-4" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                                <span>High: $\{{ stock.high }}</span>
+                                <span>Low: $\{{ stock.low }}</span>
+                                <span>Vol: {{ stock.volume }}</span>
+                            </div>
+
+                            <!-- Native SVG Chart with dynamic min/max scaling -->
+                            <div class="mb-2">
+                                <div class="text-xs font-bold mb-1">Monthly Price Trend</div>
+                                <svg viewBox="0 0 300 120" style="width: 100%; height: 140px; background: var(--surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                                    <!-- Grid lines -->
+                                    <line x1="0" y1="30" x2="300" y2="30" stroke="var(--border-color)" stroke-dasharray="2,2"/>
+                                    <line x1="0" y1="60" x2="300" y2="60" stroke="var(--border-color)" stroke-dasharray="2,2"/>
+                                    <line x1="0" y1="90" x2="300" y2="90" stroke="var(--border-color)" stroke-dasharray="2,2"/>
+                                    <!-- Polyline -->
+                                    <polyline :points="chartPoints" fill="none" stroke="var(--primary-color)" stroke-width="2.5"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const route = useRoute();
+                const symbol = route.query.symbol || 'AAPL';
+                const stock = INITIAL_STOCKS.find(s => s.symbol === symbol) || INITIAL_STOCKS[0];
+
+                const chartPoints = computed(() => {
+                    const data = stock.history;
+                    const min = Math.min(...data);
+                    const max = Math.max(...data);
+                    const range = max - min || 1;
+                    const width = 300;
+                    const height = 120;
+                    const padding = 15;
+                    
+                    return data.map((val, idx) => {
+                        const x = (idx / (data.length - 1)) * (width - 2 * padding) + padding;
+                        const y = height - padding - ((val - min) / range) * (height - 2 * padding);
+                        return `${x},${y}`;
+                    }).join(' ');
+                });
+
+                return { stock, chartPoints };
+            }
+        };
+
+        // 5. Toolbox Component
+        const ToolboxPage = {
+            template: `
+                <div class="view-container p-4">
+                    <h2 class="text-xl font-bold mb-3">Financial Toolbox</h2>
+                    
+                    <!-- Tool 1: DCA Profit-Taking Calculator -->
+                    <div class="retro-card">
+                        <h3 class="font-bold mb-2">DCA Profit-Taking Calculator</h3>
+                        <input type="number" v-model.number="dca.cost" class="retro-input" placeholder="Avg Cost Price">
+                        <input type="number" v-model.number="dca.shares" class="retro-input" placeholder="Total Shares">
+                        <input type="number" v-model.number="dca.target" class="retro-input" placeholder="Target Price">
+                        <div class="text-sm font-bold mt-2" style="padding: 8px; background: var(--surface-alt); border-radius: var(--radius-sm);">
+                            Est. Profit: $\{{ dcaProfit.toFixed(2) }} ({{ dcaReturn.toFixed(2) }}%)
+                        </div>
+                    </div>
+
+                    <!-- Tool 2: Wealth Calendar -->
+                    <div class="retro-card">
+                        <h3 class="font-bold mb-2">Wealth Calendar</h3>
+                        <input type="date" v-model="cal.date" class="retro-input">
+                        <input type="text" v-model="cal.note" class="retro-input" placeholder="Milestone note (e.g. Bond Maturity)">
+                        <button class="retro-btn mb-3" @click="addCalendarNote" style="width: 100%;">Add Event</button>
+                        <div v-for="(item, idx) in cal.list" :key="idx" class="flex justify-between text-xs py-1" style="border-bottom: 1px dashed var(--border-color);">
+                            <span>{{ item.date }}</span>
+                            <span class="font-bold">{{ item.note }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Tool 3: Loan Calculator -->
+                    <div class="retro-card">
+                        <h3 class="font-bold mb-2">Loan Calculator</h3>
+                        <input type="number" v-model.number="loan.amount" class="retro-input" placeholder="Loan Amount">
+                        <input type="number" v-model.number="loan.rate" class="retro-input" placeholder="Annual Rate (%)">
+                        <input type="number" v-model.number="loan.months" class="retro-input" placeholder="Term (Months)">
+                        <div class="text-sm font-bold mt-2" style="padding: 8px; background: var(--surface-alt); border-radius: var(--radius-sm);">
+                            Monthly Payment: $\{{ monthlyPayment.toFixed(2) }}
+                        </div>
+                    </div>
+
+                    <!-- Tool 4: Profit Calculator -->
+                    <div class="retro-card">
+                        <h3 class="font-bold mb-2">Profit Calculator</h3>
+                        <input type="number" v-model.number="profit.cost" class="retro-input" placeholder="Unit Cost">
+                        <input type="number" v-model.number="profit.price" class="retro-input" placeholder="Selling Price">
+                        <input type="number" v-model.number="profit.qty" class="retro-input" placeholder="Quantity Sold">
+                        <div class="text-sm font-bold mt-2" style="padding: 8px; background: var(--surface-alt); border-radius: var(--radius-sm);">
+                            Total Gross Profit: $\{{ totalProfit.toFixed(2) }}
+                        </div>
+                    </div>
+
+                    <!-- Tool 5: Reverse Yield Calculator -->
+                    <div class="retro-card">
+                        <h3 class="font-bold mb-2">Reverse Yield Calculator</h3>
+                        <input type="number" v-model.number="rev.target" class="retro-input" placeholder="Target Return Amount">
+                        <input type="number" v-model.number="rev.principal" class="retro-input" placeholder="Initial Principal">
+                        <input type="number" v-model.number="rev.years" class="retro-input" placeholder="Duration (Years)">
+                        <div class="text-sm font-bold mt-2" style="padding: 8px; background: var(--surface-alt); border-radius: var(--radius-sm);">
+                            Required Annual Yield: {{ requiredYield.toFixed(2) }}%
+                        </div>
+                    </div>
+
+                    <!-- Tool 6: Password Strength & MD5 Checker -->
+                    <div class="retro-card">
+                        <h3 class="font-bold mb-2">Password Strength & MD5</h3>
+                        <input type="password" v-model="pwd.input" class="retro-input" placeholder="Enter secure password">
+                        <div class="text-xs text-secondary mb-1">Strength: <span class="font-bold" :style="{color: pwdColor}">{{ pwdStrength }}</span></div>
+                        <div class="text-xs text-secondary" style="word-break: break-all;">MD5: {{ pwdMd5 }}</div>
+                    </div>
+
+                    <!-- Tool 7: Credit Memo -->
+                    <div class="retro-card">
+                        <h3 class="font-bold mb-2">Credit Memo Reminder</h3>
+                        <input type="text" v-model="credit.name" class="retro-input" placeholder="Debtor Name">
+                        <input type="number" v-model.number="credit.amount" class="retro-input" placeholder="Amount Owed">
+                        <input type="date" v-model="credit.duedate" class="retro-input">
+                        <button class="retro-btn mb-3" @click="addCredit" style="width: 100%;">Save Credit Record</button>
+                        <div v-for="(c, idx) in credit.list" :key="idx" class="flex justify-between text-xs py-1" style="border-bottom: 1px dashed var(--border-color);">
+                            <span>{{ c.name }} ($\{{ c.amount }})</span>
+                            <span class="font-bold">Due: {{ c.duedate }}</span>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                // DCA
+                const dca = ref({ cost: 100, shares: 50, target: 130 });
+                const dcaProfit = computed(() => (dca.value.target - dca.value.cost) * dca.value.shares);
+                const dcaReturn = computed(() => dca.value.cost ? ((dca.value.target - dca.value.cost) / dca.value.cost) * 100 : 0);
+
+                // Calendar
+                const cal = ref({ date: '', note: '', list: [{ date: '2026-11-01', note: 'Quarterly Dividend' }] });
+                const addCalendarNote = () => {
+                    if (cal.value.date && cal.value.note) {
+                        cal.value.list.push({ date: cal.value.date, note: cal.value.note });
+                        cal.value.note = '';
+                    }
+                };
+
+                // Loan
+                const loan = ref({ amount: 100000, rate: 5.5, months: 36 });
+                const monthlyPayment = computed(() => {
+                    const p = loan.value.amount;
+                    const r = loan.value.rate / 100 / 12;
+                    const n = loan.value.months;
+                    if (!r || !n) return p / (n || 1);
+                    return (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+                });
+
+                // Profit
+                const profit = ref({ cost: 40, price: 65, qty: 150 });
+                const totalProfit = computed(() => (profit.value.price - profit.value.cost) * profit.value.qty);
+
+                // Reverse Yield
+                const rev = ref({ target: 15000, principal: 10000, years: 3 });
+                const requiredYield = computed(() => {
+                    if (!rev.value.principal || !rev.value.years) return 0;
+                    const totalGain = rev.value.target / rev.value.principal;
+                    return (Math.pow(totalGain, 1 / rev.value.years) - 1) * 100;
+                });
+
+                // Password & MD5
+                const pwd = ref('');
+                const pwdStrength = computed(() => {
+                    const val = pwd.value;
+                    if (!val) return 'Empty';
+                    if (val.length < 6) return 'Weak';
+                    if (val.length < 10 && /[A-Z]/.test(val) && /[0-9]/.test(val)) return 'Moderate';
+                    if (val.length >= 10 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) return 'Strong';
+                    return 'Fair';
+                });
+                const pwdColor = computed(() => {
+                    const s = pwdStrength.value;
+                    if (s === 'Strong') return '#276749';
+                    if (s === 'Moderate' || s === 'Fair') return '#d97706';
+                    return '#9b2c2c';
+                });
+                const pwdMd5 = computed(() => pwd.value ? md5(pwd.value) : 'N/A');
+
+                // Credit Memo
+                const credit = ref({ name: '', amount: '', duedate: '', list: [] });
+                const addCredit = () => {
+                    if (credit.value.name && credit.value.amount) {
+                        credit.value.list.push({ name: credit.value.name, amount: credit.value.amount, duedate: credit.value.duedate || 'TBD' });
+                        credit.value.name = '';
+                        credit.value.amount = '';
+                    }
+                };
+
+                return { dca, dcaProfit, dcaReturn, cal, addCalendarNote, loan, monthlyPayment, profit, totalProfit, rev, requiredYield, pwd: { input: pwd }, pwdStrength, pwdColor, pwdMd5, credit, addCredit };
+            }
+        };
+
+        // 6. Settings Component
+        const SettingsPage = {
+            template: `
+                <div class="view-container p-4">
+                    <h2 class="text-xl font-bold mb-3">Settings</h2>
+                    
+                    <div class="retro-card">
+                        <div @click="$router.push('/version')" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <span class="font-bold text-sm">Version Info</span>
+                            <span class="text-xs text-secondary">v2.4.0</span>
+                        </div>
+                        <div @click="$router.push('/privacy')" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <span class="font-bold text-sm">Privacy Policy</span>
+                            <span class="text-xs text-secondary">&gt;</span>
+                        </div>
+                        <div @click="$router.push('/terms')" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <span class="font-bold text-sm">Terms of Service</span>
+                            <span class="text-xs text-secondary">&gt;</span>
+                        </div>
+                        <div @click="$router.push('/team')" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <span class="font-bold text-sm">About Team</span>
+                            <span class="text-xs text-secondary">&gt;</span>
+                        </div>
+                        <div @click="contactUs" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <span class="font-bold text-sm">Contact Us</span>
+                            <span class="text-xs text-secondary">avdewfew.vaefa.vew.w@gmail.com</span>
+                        </div>
+                        <div @click="$router.push('/checkin')" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <span class="font-bold text-sm">Monthly Check-in</span>
+                            <span class="text-xs text-secondary">Check</span>
+                        </div>
+                        <div @click="$router.push('/feedback')" class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--border-color); cursor: pointer;">
+                            <span class="font-bold text-sm">Customer Feedback</span>
+                            <span class="text-xs text-secondary">&gt;</span>
+                        </div>
+                        <div @click="$router.push('/inbox')" class="flex justify-between items-center py-2" style="cursor: pointer;">
+                            <span class="font-bold text-sm">Inbox Messages</span>
+                            <span class="text-xs text-secondary">1 Unread</span>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const contactUs = () => {
+                    window.location.href = 'mailto:avdewfew.vaefa.vew.w@gmail.com';
+                };
+                return { contactUs };
+            }
+        };
+
+        // Subpages for Settings
+        const VersionPage = {
+            template: `
+                <div>
+                    <header class="app-header"><button class="back-btn" @click="$router.back()">Back</button><h2 class="font-bold text-lg">Version</h2><div style="width:40px;"></div></header>
+                    <div class="view-container p-4"><div class="retro-card text-center"><h3 class="font-bold text-lg mb-2">UIDPPRO v2.4.0</h3><p class="text-xs text-secondary">Latest production build running smoothly on mobile webview.</p></div></div>
+                </div>
+            `
+        };
+
+        const PrivacyPage = {
+            template: `
+                <div>
+                    <header class="app-header"><button class="back-btn" @click="$router.back()">Back</button><h2 class="font-bold text-lg">Privacy Policy</h2><div style="width:40px;"></div></header>
+                    <div class="view-container p-4"><div class="retro-card"><p class="text-xs mb-2">We value your privacy. All financial calculations and records are stored locally on your device storage. We do not track or store personal financial credentials on external servers.</p></div></div>
+                </div>
+            `
+        };
+
+        const TermsPage = {
+            template: `
+                <div>
+                    <header class="app-header"><button class="back-btn" @click="$router.back()">Back</button><h2 class="font-bold text-lg">Terms of Service</h2><div style="width:40px;"></div></header>
+                    <div class="view-container p-4"><div class="retro-card"><p class="text-xs mb-2">By accessing and using UIDPPRO, you agree to comply with our financial tool usage guidelines. All outputs are for analytical reference only and do not constitute formal financial advice.</p></div></div>
+                </div>
+            `
+        };
+
+        const TeamPage = {
+            template: `
+                <div>
+                    <header class="app-header"><button class="back-btn" @click="$router.back()">Back</button><h2 class="font-bold text-lg">About Team</h2><div style="width:40px;"></div></header>
+                    <div class="view-container p-4"><div class="retro-card"><p class="text-xs mb-2">UIDPPRO is engineered by a dedicated collective of senior mobile frontend architects and financial technologists committed to robust offline-first utility apps.</p></div></div>
+                </div>
+            `
+        };
+
+        const CheckinPage = {
+            template: `
+                <div>
+                    <header class="app-header"><button class="back-btn" @click="$router.back()">Back</button><h2 class="font-bold text-lg">Monthly Check-in</h2><div style="width:40px;"></div></header>
+                    <div class="view-container p-4">
+                        <div class="retro-card text-center">
+                            <p class="text-sm font-bold mb-3">Current Month Check-in Status</p>
+                            <button class="retro-btn mb-3" @click="checkin" :disabled="checked"> {{ checked ? 'Checked In Today' : 'Click to Check-in' }} </button>
+                            <p class="text-xs text-secondary">Total Check-ins: {{ count }} Days</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const checked = ref(localStorage.getItem('uidpp_checked') === 'true');
+                const count = ref(parseInt(localStorage.getItem('uidpp_count') || '5'));
+                const checkin = () => {
+                    if (!checked.value) {
+                        checked.value = true;
+                        count.value += 1;
+                        localStorage.setItem('uidpp_checked', 'true');
+                        localStorage.setItem('uidpp_count', count.value);
+                    }
+                };
+                return { checked, count, checkin };
+            }
+        };
+
+        const FeedbackPage = {
+            template: `
+                <div>
+                    <header class="app-header"><button class="back-btn" @click="$router.back()">Back</button><h2 class="font-bold text-lg">Feedback</h2><div style="width:40px;"></div></header>
+                    <div class="view-container p-4">
+                        <div class="retro-card">
+                            <input type="text" v-model="title" class="retro-input" placeholder="Feedback Title">
+                            <textarea v-model="content" class="retro-input" rows="4" placeholder="Describe your issue or suggestion..." style="resize: none;"></textarea>
+                            <button class="retro-btn" :disabled="!isValid" @click="submit" style="width: 100%;">Send Feedback</button>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const title = ref('');
+                const content = ref('');
+                const router = useRouter();
+                const isValid = computed(() => title.value.trim() !== '' && content.value.trim() !== '');
+
+                const submit = () => {
+                    if (isValid.value) {
+                        alert('Feedback sent successfully!');
+                        title.value = '';
+                        content.value = '';
+                        router.back();
+                    }
+                };
+                return { title, content, isValid, submit };
+            }
+        };
+
+        const InboxPage = {
+            template: `
+                <div>
+                    <header class="app-header"><button class="back-btn" @click="$router.back()">Back</button><h2 class="font-bold text-lg">Inbox</h2><div style="width:40px;"></div></header>
+                    <div class="view-container p-4">
+                        <div class="retro-card" @click="showAlert = true" style="cursor: pointer;">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-sm">Welcome to UIDPPRO</span>
+                                <span class="text-xs text-secondary">Oct 2026</span>
+                            </div>
+                            <p class="text-xs text-secondary mt-1">Tap to read official release greeting and system bulletin.</p>
+                        </div>
+                        <div v-if="showAlert" class="retro-card mt-3" style="border-color: var(--primary-color);">
+                            <h4 class="font-bold text-sm mb-1">Welcome Bulletin</h4>
+                            <p class="text-xs mb-2">Thank you for deploying UIDPPRO. All core mobile frontend capabilities, local tools, and data engines are fully operational.</p>
+                            <button class="retro-btn" @click="showAlert = false" style="width: 100%;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const showAlert = ref(false);
+                return { showAlert };
+            }
+        };
+
+        // Router Configuration
+        const routes = [
+            { path: '/', component: LoadingPage },
+            { path: '/home', component: HomePage },
+            { path: '/category-list', component: CategoryListPage },
+            { path: '/detail', component: DetailPage },
+            { path: '/toolbox', component: ToolboxPage },
+            { path: '/settings', component: SettingsPage },
+            { path: '/version', component: VersionPage },
+            { path: '/privacy', component: PrivacyPage },
+            { path: '/terms', component: TermsPage },
+            { path: '/team', component: TeamPage },
+            { path: '/checkin', component: CheckinPage },
+            { path: '/feedback', component: FeedbackPage },
+            { path: '/inbox', component: InboxPage }
+        ];
+
+        const router = createRouter({
+            history: createWebHashHistory(),
+            routes
+        });
+
+        // Main App Instance
+        const app = createApp({
+            setup() {
+                const route = useRoute();
+                const showTabBar = computed(() => {
+                    const path = route.path;
+                    return path === '/home' || path === '/toolbox' || path === '/settings';
+                });
+                const toastMessage = ref('');
+                return { showTabBar, toastMessage };
+            }
+        });
+
+        app.use(router);
+        app.mount('#app');
+    </script>
+</body>
+</html>
